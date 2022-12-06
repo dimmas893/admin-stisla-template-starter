@@ -89,7 +89,7 @@ class AdminController extends Controller
     public function update(Request $request)
     {
         $fileName = '';
-        $emp = Admin::find($request->emp_id);
+        $emp = Admin::find($request->id);
         // if ($request->hasFile('image')) {
         //     $file = $request->file('image');
         //     $fileName = time() . '.' . $file->getClientOriginalExtension();
