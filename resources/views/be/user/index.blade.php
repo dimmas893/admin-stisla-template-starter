@@ -24,7 +24,7 @@
                             <div class="my-2">
                                 <label for="password">Password</label>
                                 <input type="text" name="password" id="passwordInsert" class="form-control"
-                                    placeholder="Masukan Password" autocomplete="off">
+                                    placeholder="Masukan Password">
                                 <button type="button" class="btn btn-info mt-2" id="togglePasswordInsert">Sembunyikan
                                     Password</button>
                             </div>
@@ -124,9 +124,6 @@
 
 @section('js')
     <script>
-        $(document).ready(function() {
-            $("#tes").html('html');
-        });
         $(function() {
             $("#add_TU_form").submit(function(e) {
                 e.preventDefault();
