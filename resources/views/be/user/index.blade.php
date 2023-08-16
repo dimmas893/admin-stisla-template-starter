@@ -7,9 +7,6 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="exampleModalLabel">Tambah Data User</h5>
-                        {{-- <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button> --}}
                     </div>
                     <form action="#" method="POST" id="add_TU_form" enctype="multipart/form-data">
                         @csrf
@@ -26,7 +23,10 @@
 
                             <div class="my-2">
                                 <label for="password">Password</label>
-                                <input type="password" name="password" class="form-control" placeholder="Masukan Password">
+                                <input type="password" name="password" id="passwordInsert" class="form-control"
+                                    placeholder="Masukan Password">
+                                <button type="button" class="btn btn-info mt-2" id="togglePasswordInsert">Tampilkan
+                                    Password</button>
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -38,16 +38,12 @@
             </div>
         </div>
 
-        {{-- add new employee modal end --}}
-
-        {{-- edit employee modal start --}}
         <div class="modal fade" id="editTUModal" tabindex="-1" aria-labelledby="exampleModalLabel" data-backdrop="static"
             aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="exampleModalLabel">Edit Admin</h5>
-                        {{-- <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button> --}}
                     </div>
                     <form action="#" method="POST" id="edit_TU_form" enctype="multipart/form-data">
                         @csrf
@@ -56,13 +52,13 @@
                             <div class="my-2">
                                 <label for="name">Name</label>
                                 <input type="text" id="name" name="name" class="form-control"
-                                    placeholder="Masukan Nama" required>
+                                    placeholder="Masukan Nama">
                             </div>
 
                             <div class="my-2">
                                 <label for="email">Email</label>
                                 <input type="email" id="email" name="email" class="form-control"
-                                    placeholder="Masukan Email" required>
+                                    placeholder="Masukan Email">
                             </div>
 
                             <div class="my-2">
@@ -81,7 +77,6 @@
                 </div>
             </div>
         </div>
-        {{-- edit employee modal end --}}
 
         <section class="section">
             <div class="section-header">
@@ -112,7 +107,6 @@
 @section('js')
     <script>
         $(function() {
-            // add new employee ajax request
             $("#add_TU_form").submit(function(e) {
                 e.preventDefault();
                 var _token = $("input[name='_token']").val();
@@ -128,22 +122,22 @@
                         email: email,
                         password: password
                     },
-                    success: function(data) {
-                        if ($.isEmptyObject(data.error)) {
-                            printSuccessMsg(data.success)
+                    success: function(response) {
+                        if ($.isEmptyObject(response.error)) {
+                            printSuccessMsg(response.success);
                             $("#add_TU_btn").text('Save');
                             $("#add_TU_form")[0].reset();
                             $("#add_TU_modal").modal('hide');
                             TU_all();
                         } else {
-                            printErrorMsg(data.error);
+                            printErrorMsg(response.error);
                         }
                     }
                 });
             });
 
 
-            // edit employee ajax request
+
             $(document).on('click', '.editIcon', function(e) {
                 e.preventDefault();
                 let id = $(this).attr('id');
@@ -157,17 +151,15 @@
                     success: function(response) {
                         $("#name").val(response.name);
                         $("#email").val(response.email);
-                        // $("#password").val(response.password);
                         $("#password").val(response.password_asli);
                         $("#id").val(response.id);
                     }
                 });
             });
-            // update employee ajax request
             $("#edit_TU_form").submit(function(e) {
                 e.preventDefault();
                 var _token = $("input[name='_token']").val();
-                var id = $("#id").val(); // You need to get the id from your form
+                var id = $("#id").val();
                 var name = $("input[id='name']").val();
                 var email = $("input[id='email']").val();
                 var password = $("input[id='password']").val();
@@ -184,7 +176,7 @@
                         email: email,
                         password: password
                     },
-                    dataType: 'json', // Specify data type explicitly
+                    dataType: 'json',
                     success: function(response) {
                         if ($.isEmptyObject(response.error)) {
                             printSuccessMsg(response.success);
@@ -199,7 +191,6 @@
                 });
             });
 
-            // delete employee ajax request
             $(document).on('click', '.deleteIcon', function(e) {
                 e.preventDefault();
                 let id = $(this).attr('id');
@@ -222,19 +213,13 @@
                                 _token: csrf
                             },
                             success: function(response) {
-                                console.log(response);
-                                Swal.fire(
-                                    'Deleted!',
-                                    'Your file has been deleted.',
-                                    'success'
-                                )
+                                printSuccessMsg(response.success)
                                 TU_all();
                             }
                         });
                     }
                 })
             });
-            // fetch all employees ajax request
             TU_all();
 
             function TU_all() {
@@ -301,6 +286,7 @@
         });
     </script>
     <script>
+        // lihat password edit
         var togglePassword = document.getElementById("togglePassword");
         var passwordInput = document.getElementById("password");
 
@@ -311,6 +297,20 @@
             } else {
                 passwordInput.type = "password";
                 togglePassword.textContent = "Tampilkan Password";
+            }
+        });
+
+        // lihat password insert
+        var togglePasswordInsert = document.getElementById("togglePasswordInsert");
+        var passwordInputInsert = document.getElementById("passwordInsert");
+
+        togglePasswordInsert.addEventListener("click", function() {
+            if (passwordInputInsert.type === "password") {
+                passwordInputInsert.type = "text";
+                togglePasswordInsert.textContent = "Sembunyikan Password";
+            } else {
+                passwordInputInsert.type = "password";
+                togglePasswordInsert.textContent = "Tampilkan Password";
             }
         });
     </script>

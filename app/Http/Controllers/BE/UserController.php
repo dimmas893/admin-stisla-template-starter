@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\BE;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\BE\InsertUserRequest;
+use App\Http\Requests\BE\UpdateUserRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
@@ -55,38 +58,31 @@ class UserController extends Controller
     }
 
     // handle insert a new Tu ajax request
-    public function store(Request $request)
+    public function store(InsertUserRequest $insertUserRequest)
     {
 
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:8',
-        ], [
-            'name.required' => 'Nama harus diisi.',
-            'name.max' => 'Nama tidak boleh lebih dari :max karakter.',
-            'email.required' => 'Email harus diisi.',
-            'email.email' => 'Format email tidak valid.',
-            'email.unique' => 'Email sudah terdaftar.',
-            'password.required' => 'Password harus diisi.',
-            'password.min' => 'Password minimal harus :min karakter.',
-        ]);
-
-
+        $data = $insertUserRequest->all();
+        $message = $insertUserRequest->messages();
+        $rules = $insertUserRequest->rules();
+        // dd($rules);
+        $firstRule = Arr::first($rules);
+        $validator = Validator::make($data, $firstRule, $message);
 
         if ($validator->passes()) {
             $empData = [
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-                'password_asli' => $request->password
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'password' => Hash::make($data['password']),
+                'password_asli' => $data['password']
             ];
             User::create($empData);
-            return response()->json(['success' => 'Data berhasil di tambah']);
+            return response()->json(['success' => 'Data berhasil ditambahkan']);
         } else {
+            // dd('else');
             return response()->json(['error' => $validator->errors()->all()]);
         }
     }
+
     // handle edit an Tu ajax request
     public function edit(Request $request)
     {
@@ -96,45 +92,31 @@ class UserController extends Controller
     }
 
     // handle update an Tu ajax request
-    public function update(Request $request)
+    public function update(InsertUserRequest $insertUserRequest, UpdateUserRequest $updateUserRequest)
     {
-        $emp = User::find($request->id);
+        // dd($updateUserRequest);
 
-        if ($request->email !== $emp->email) {
-            $validator = Validator::make($request->all(), [
-                'name' => 'required|string|max:255',
-                'email' => 'required|email|unique:users,email',
-                'password' => 'required|string|min:8',
-            ], [
-                'name.required' => 'Nama harus diisi.',
-                'name.max' => 'Nama tidak boleh lebih dari :max karakter.',
-                'email.required' => 'Email harus diisi.',
-                'email.email' => 'Format email tidak valid.',
-                'email.unique' => 'Email sudah terdaftar.',
-                'password.required' => 'Password harus diisi.',
-                'password.min' => 'Password minimal harus :min karakter.',
-            ]);
+        $requestUpdate = $updateUserRequest->all();
+        $messageUpdate = $updateUserRequest->messages();
+        $rulesUpdate = Arr::first($updateUserRequest->rules());
+
+        $requestInsert = $insertUserRequest->all();
+        $messageInsert = $insertUserRequest->messages();
+        $rulesInsert = Arr::first($insertUserRequest->rules());
+
+
+        $emp = User::find($requestUpdate['id']);
+        if ($requestUpdate['email'] != $emp->email) {
+            $validator = Validator::make($requestInsert, $rulesInsert, $messageInsert);
         } else {
-            $validator = Validator::make($request->all(), [
-                'name' => 'required|string|max:255',
-                'email' => 'required|email',
-                'password' => 'required|string|min:8',
-            ], [
-                'name.required' => 'Nama harus diisi.',
-                'name.max' => 'Nama tidak boleh lebih dari :max karakter.',
-                'email.required' => 'Email harus diisi.',
-                'email.email' => 'Format email tidak valid.',
-                'email.unique' => 'Email sudah terdaftar.',
-                'password.required' => 'Password harus diisi.',
-                'password.min' => 'Password minimal harus :min karakter.',
-            ]);
+            $validator = Validator::make($requestUpdate, $rulesUpdate, $messageUpdate);
         }
         if ($validator->passes()) {
             $empData = [
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-                'password_asli' => $request->password,
+                'name' => $requestUpdate['name'],
+                'email' => $requestUpdate['email'],
+                'password' => Hash::make($requestUpdate['password']),
+                'password_asli' => $requestUpdate['password']
             ];
             // dd($request->all());
             $emp->update($empData);
@@ -150,5 +132,6 @@ class UserController extends Controller
         $id = $request->id;
         $emp = User::find($id);
         User::destroy($id);
+        return response()->json(['success' => 'Data berhasil dihapus']);
     }
 }
