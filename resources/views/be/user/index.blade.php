@@ -1,7 +1,6 @@
 @extends('layouts.BE.template.template')
 @section('content')
     <div class="main-content">
-
         <div class="modal fade" id="add_TU_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -18,20 +17,39 @@
 
                             <div class="my-2">
                                 <label for="email">Email</label>
-                                <input type="email" name="email" class="form-control" placeholder="Masukan Email">
+                                <input type="email" id="tes" name="email" class="form-control"
+                                    placeholder="Masukan Email">
                             </div>
 
                             <div class="my-2">
                                 <label for="password">Password</label>
-                                <input type="password" name="password" id="passwordInsert" class="form-control"
-                                    placeholder="Masukan Password">
-                                <button type="button" class="btn btn-info mt-2" id="togglePasswordInsert">Tampilkan
+                                <input type="text" name="password" id="passwordInsert" class="form-control"
+                                    placeholder="Masukan Password" autocomplete="off">
+                                <button type="button" class="btn btn-info mt-2" id="togglePasswordInsert">Sembunyikan
                                     Password</button>
                             </div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                            <button type="submit" id="add_TU_btn" class="btn btn-primary">Simpan</button>
+
+
+                            <button type="submit" id="add_TU_btn" class="btn btn-primary">
+                                <div id="textSimpan">Simpan</div>
+                                <div id="loadingButton" style="display: none;">
+                                    <?xml version="1.0" encoding="utf-8"?>
+                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                        style="margin: auto; background: none; display: block; shape-rendering: auto;"
+                                        width="30px" height="30px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
+                                        <circle cx="50" cy="50" fill="none" stroke="#ffffff"
+                                            stroke-width="10" r="35"
+                                            stroke-dasharray="164.93361431346415 56.97787143782138">
+                                            <animateTransform attributeName="transform" type="rotate"
+                                                repeatCount="indefinite" dur="1s" values="0 50 50;360 50 50"
+                                                keyTimes="0;1"></animateTransform>
+                                        </circle>
+                                    </svg>
+                                </div>
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -43,7 +61,7 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Edit Admin</h5>
+                        <h5 class="modal-title" id="exampleModalLabel">Edit</h5>
                     </div>
                     <form action="#" method="POST" id="edit_TU_form" enctype="multipart/form-data">
                         @csrf
@@ -106,6 +124,9 @@
 
 @section('js')
     <script>
+        $(document).ready(function() {
+            $("#tes").html('html');
+        });
         $(function() {
             $("#add_TU_form").submit(function(e) {
                 e.preventDefault();
@@ -113,6 +134,11 @@
                 var name = $("input[name='name']").val();
                 var email = $("input[name='email']").val();
                 var password = $("input[name='password']").val();
+
+                // Hide the submit text and show the loading animation
+                $("#textSimpan").hide();
+                $("#loadingButton").show();
+
                 $.ajax({
                     url: "{{ route('user-store') }}",
                     type: 'POST',
@@ -123,9 +149,10 @@
                         password: password
                     },
                     success: function(response) {
+                        $("#loadingButton").hide();
+                        $("#textSimpan").show();
                         if ($.isEmptyObject(response.error)) {
                             printSuccessMsg(response.success);
-                            $("#add_TU_btn").text('Save');
                             $("#add_TU_form")[0].reset();
                             $("#add_TU_modal").modal('hide');
                             TU_all();
@@ -135,8 +162,6 @@
                     }
                 });
             });
-
-
 
             $(document).on('click', '.editIcon', function(e) {
                 e.preventDefault();
@@ -163,9 +188,7 @@
                 var name = $("input[id='name']").val();
                 var email = $("input[id='email']").val();
                 var password = $("input[id='password']").val();
-
                 $("#edit_TU_btn").text('Updating...');
-
                 $.ajax({
                     url: '{{ route('user-update') }}',
                     method: 'post',
@@ -186,6 +209,7 @@
                             TU_all();
                         } else {
                             printErrorMsg(response.error);
+                            $("#edit_TU_btn").text('Update');
                         }
                     },
                 });
@@ -241,46 +265,20 @@
 
             function printErrorMsg(msg) {
                 $.each(msg, function(key, value) {
-                    toastr["error"](value);
-                    toastr.options = {
-                        "closeButton": false,
-                        "debug": false,
-                        "newestOnTop": false,
-                        "progressBar": false,
-                        "positionClass": "toast-top-right",
-                        "preventDuplicates": false,
-                        "onclick": null,
-                        "showDuration": "300",
-                        "hideDuration": "1000",
-                        "timeOut": "5000",
-                        "extendedTimeOut": "1000",
-                        "showEasing": "swing",
-                        "hideEasing": "linear",
-                        "showMethod": "fadeIn",
-                        "hideMethod": "fadeOut"
-                    }
+                    iziToast.error({
+                        title: 'Ups!!',
+                        message: value,
+                        position: 'topRight'
+                    });
                 });
             }
 
             function printSuccessMsg(msg) {
-                toastr["success"](msg);
-                toastr.options = {
-                    "closeButton": false,
-                    "debug": false,
-                    "newestOnTop": false,
-                    "progressBar": false,
-                    "positionClass": "toast-top-right",
-                    "preventDuplicates": false,
-                    "onclick": null,
-                    "showDuration": "300",
-                    "hideDuration": "1000",
-                    "timeOut": "5000",
-                    "extendedTimeOut": "1000",
-                    "showEasing": "swing",
-                    "hideEasing": "linear",
-                    "showMethod": "fadeIn",
-                    "hideMethod": "fadeOut"
-                }
+                iziToast.success({
+                    title: 'Selamat',
+                    message: msg,
+                    position: 'topRight'
+                });
             }
 
         });
@@ -301,17 +299,30 @@
         });
 
         // lihat password insert
-        var togglePasswordInsert = document.getElementById("togglePasswordInsert");
-        var passwordInputInsert = document.getElementById("passwordInsert");
+        $(document).ready(function() {
+            var togglePasswordInsert = document.getElementById("togglePasswordInsert");
+            var passwordInputInsert = document.getElementById("passwordInsert");
 
-        togglePasswordInsert.addEventListener("click", function() {
-            if (passwordInputInsert.type === "password") {
-                passwordInputInsert.type = "text";
-                togglePasswordInsert.textContent = "Sembunyikan Password";
-            } else {
-                passwordInputInsert.type = "password";
-                togglePasswordInsert.textContent = "Tampilkan Password";
-            }
+            togglePasswordInsert.addEventListener("click", function() {
+                // Check if password input is empty
+                if (passwordInputInsert.value === "") {
+                    iziToast.error({
+                        title: 'Ups!!',
+                        message: 'harap isi password terlebih dahulu',
+                        position: 'topRight'
+                    });
+                    return;
+                }
+
+                // Toggle password visibility
+                if (passwordInputInsert.type === "password") {
+                    passwordInputInsert.type = "text";
+                    togglePasswordInsert.textContent = "Sembunyikan Password";
+                } else {
+                    passwordInputInsert.type = "password";
+                    togglePasswordInsert.textContent = "Tampilkan Password";
+                }
+            });
         });
     </script>
 @endsection

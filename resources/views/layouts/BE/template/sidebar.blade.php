@@ -15,6 +15,10 @@
             <li><a class="nav-link" href="index.html">Ecommerce Dashboard</a></li>
           </ul>
         </li> --}}
+            <li class="nav-item {{ request()->is('dashboard') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('dashboard') }}"><i class="fas fa-fire"></i>
+                    Dashboard</a>
+            </li>
             <li class="nav-item {{ request()->is('user') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('user') }}"><i class="fas fa-user"></i>
                     User</a>

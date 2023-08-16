@@ -47,6 +47,7 @@
 
 
     @include('layouts.BE.template.scripts')
+    <div id="loading">Loading&#8230;</div>
 </body>
 
 </html>
